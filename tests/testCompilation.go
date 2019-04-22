@@ -18,7 +18,7 @@ import "log"
 
 //export callback
 func callback() {
-	fmt.Println("signal!")
+	fmt.Println("compilation succeed, lib loaded")
 }
 
 func main() {
