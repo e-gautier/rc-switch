@@ -8,28 +8,37 @@ package main
 // #cgo CFLAGS: -g -Wall -Wno-unused-function
 // #cgo LDFLAGS: -lm -lwiringPi
 // #include <wiringPi.h>
-// extern void callback();
-// static void wiringPiISRWrapper(int pin, int edgeType) {
-//	wiringPiISR(pin, edgeType, &callback);
-// }
 import "C"
-import "fmt"
-import "log"
+import (
+	"log"
+	"os"
+	"strconv"
+)
 
-//export callback
-func callback() {
-	fmt.Println("signal!")
+func send(code int)  {
+	
 }
 
-func main() {
+func main()  {
+	args := os.Args
+	if len(args) < 2 {
+		log.Println("parameters not valid")
+	}
+
 	log.Println("calling setup")
 	init := C.wiringPiSetup()
 
 	if init == -1 {
-		fmt.Println("init failed")
+		log.Println("init failed")
 		return
 	}
 
-	log.Println("calling handler")
-	C.wiringPiISRWrapper(2, C.INT_EDGE_BOTH)
+	codeStr := os.Args[1]
+	code, err := strconv.Atoi(codeStr)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	send(code)
 }
