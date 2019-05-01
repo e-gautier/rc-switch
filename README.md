@@ -1,6 +1,7 @@
 # rc-switch
 
 ## requirements
+- raspberry pi with GPIO and antenna receiver plugged on GPIO 2
 - Go 1.12
 - wiring pi lib https://github.com/WiringPi/WiringPi
 - raspberry pi toolchain https://github.com/raspberrypi/tools

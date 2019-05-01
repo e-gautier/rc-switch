@@ -5,6 +5,7 @@ type PT2262 struct {
 	SyncFactor     HighLow
 	Zero           HighLow
 	One            HighLow
+	Gap            int // max time between signals (microseconds)
 	InvertedSignal bool
 }
 
@@ -14,6 +15,7 @@ func GetPT2262Protocol() PT2262 {
 		HighLow{1, 31},
 		HighLow{1, 3},
 		HighLow{3, 1},
+		9900, // I got this by measurement
 		false,
 	}
 }
