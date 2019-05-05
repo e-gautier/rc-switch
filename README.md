@@ -1,39 +1,46 @@
 # rc-switch
 
 ## requirements
-- raspberry pi with GPIO and antenna receiver plugged on GPIO 2
+- raspberry pi with GPIO,
+- antenna receiver plugged on GPIO 2
+- antenna transmitter plugged on GPIO 0
 - Go 1.12
 - wiring pi lib https://github.com/WiringPi/WiringPi
 - raspberry pi toolchain https://github.com/raspberrypi/tools
-- Wiringpi installed on the target raspberry pi http://wiringpi.com/download-and-install/
+- Wiring-pi lib installed on the target raspberry pi http://wiringpi.com/download-and-install/
 ## setup cross compile
 get the toolchain
 ```bash
-cd ~/Download && git clone https://github.com/raspberrypi/tools
+git clone https://github.com/raspberrypi/tools
 ```
-add compiler to path
+add toolchain compilers to path
 ```bash
-PATH=$PATH:~/Downloads/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin/
+PATH=$PATH:~/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin/
 ```
-build wiring pi lib (command has to be ran on the target!)
+build wiring pi lib (**command has to be ran on the target**)
 ```bash
-sudo apt install git && cd /tmp && git clone https://github.com/WiringPi/WiringPi && cd WiringPi && ./build
+apt install git && \
+cd /tmp && \
+git clone https://github.com/WiringPi/WiringPi && \
+cd WiringPi && \
+./build
 ```
 repatriate the compiled .so(s) to the compiler
 ```bash
-scp <user@pi>:/usr/local/lib/libwiringPi* ~/Download/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/arm-linux-gnueabihf/lib/
+scp <user@pi>:/usr/local/lib/libwiringPi* ~/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/arm-linux-gnueabihf/lib/
 ```
 cross the hell compile to arm
 ```bash
-env GOOS=linux GOARCH=arm CC=arm-linux-gnueabihf-gcc CC_FOR_TARGET=arm-linux-gnueabihf-gcc CGO_ENABLED=1 go build -i -v -o build/rc-switch main.go
+make
 ```
 send binary to target
 ```bash
-scp build/rc-switch <user@pi>:/tmp
+scp build/send build/sniffer <user@pi>:/tmp
 ```
-run
+run (target)
 ```bash
-cd /tmp && ./rc-switch
+./sniffer 2
+./send 0 9999
 ```
 ### tests
 easy way to find out if compilation is well made and lib is loaded in the wrapper:
