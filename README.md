@@ -46,3 +46,9 @@ env GOOS=linux GOARCH=arm CC=arm-linux-gnueabihf-gcc CC_FOR_TARGET=arm-linux-gnu
 2019/04/22 15:06:16 calling handler
 compilation succeed, lib loaded
 ```
+
+### sources
+- http://rfelektronik.se/manuals/Datasheets/HX2262.pdf
+- https://github.com/sui77/rc-switch
+- http://wiringpi.com/reference
+- https://golang.org/cmd/cgo/
