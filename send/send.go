@@ -24,14 +24,13 @@ const RepeatTransmit = 10
 // properties of the PT2262 protocol
 var pt2262 = protocols.GetPT2262Protocol()
 
-func send(pin int, word string)  {
+func send(pin int, code int)  {
 
-	// add zeros til size 24
-	for len(word) <= 23 {
-		word = "0" + word
-	}
+	//decimal & operation on code word to convert it to binary
+	//ex: 1361 -> 10101010001
+	word := strconv.FormatInt(int64(code), 2)
 
-	for i := 0; i <= 23; i++ {
+	for i := 0; i < len(word); i++ {
 
 		bit := string(word[i])
 
@@ -52,7 +51,6 @@ func send(pin int, word string)  {
 	// transmit the sync bit at the end
 	transmit(pin, pt2262.SyncFactor)
 	fmt.Println("")
-	C.digitalWrite(C.int(pin), C.LOW)
 }
 
 func transmit(pin int, bit protocols.HighLow)  {
@@ -87,14 +85,15 @@ func main()  {
 		return
 	}
 
-	code, _ := strconv.Atoi(word)
+	// init GPIO pin on output mode
+	C.pinMode(C.int(pin), C.OUTPUT)
 
-	// decimal & operation on code word to convert it to binary
-	// ex: 1361 -> 10101010001
-	word = strconv.FormatInt(int64(code), 2)
+	code, _ := strconv.Atoi(word)
 
 	log.Printf("sending %d times %d\n", RepeatTransmit, code)
 	for i := 0; i < RepeatTransmit; i++ {
-		send(pin, word)
+		send(pin, code)
 	}
+
+	C.digitalWrite(C.int(pin), C.LOW)
 }
