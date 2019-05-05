@@ -55,7 +55,7 @@ run (target)
 ./sniffer 2
 ./send 0 9999
 ```
-### tests
+## tests
 easy way to find out if compilation is well made and lib is loaded in the wrapper:
 ```bash
 env GOOS=linux GOARCH=arm CC=arm-linux-gnueabihf-gcc CC_FOR_TARGET=arm-linux-gnueabihf-gcc CGO_ENABLED=1 go build -i -v -o build/test tests/testCompilation.go
@@ -67,7 +67,7 @@ env GOOS=linux GOARCH=arm CC=arm-linux-gnueabihf-gcc CC_FOR_TARGET=arm-linux-gnu
 compilation succeed, lib loaded
 ```
 
-### sources
+## sources
 - http://rfelektronik.se/manuals/Datasheets/HX2262.pdf
 - https://github.com/sui77/rc-switch
 - http://wiringpi.com/reference
