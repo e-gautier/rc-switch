@@ -1,7 +1,14 @@
 # rc-switch
-Not really rc-switch but more like a test I made of the CGO wrapper on a cross-compiled arm lib.
+Not really rc-switch but more like a test I made of the CGO wrapper on a cross-compiled C arm lib.
 ## quick start
-
+```bash
+wget https://git.io/fjnXH && \
+unzip send_sniffer_0.0.1.zip
+```
+```bash
+./send 0 9999
+./sniffer 2
+```
 ## TODO
 - more doc
 - more experiment
