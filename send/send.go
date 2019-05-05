@@ -14,6 +14,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"syscall"
 )
 import "../protocols"
 
@@ -23,53 +24,60 @@ const RepeatTransmit = 10
 // properties of the PT2262 protocol
 var pt2262 = protocols.GetPT2262Protocol()
 
-func length(word int) (length int) {
-	for word != 0 {
-		word /= 10
-		length++
+func send(pin int, word string)  {
+
+	// add zeros til size 24
+	for len(word) <= 23 {
+		word = "0" + word
 	}
 
-	return length
-}
+	for i := 0; i <= 23; i++ {
 
-func send(code int)  {
-	wordLength := 24
-	for i := wordLength - 1; i >= 0; i-- {
+		bit := string(word[i])
 
-		// decimal & operation on code word to convert it to binary
-		// ex: 1361 -> 10101010001
-		if code & (1 << uint(i)) == 1 {
-			// transmit 1
-			transmit(pt2262.One)
+		if bit == "1" {
 			fmt.Print(1)
-		} else {
-			// transmit 0
-			transmit(pt2262.Zero)
+			// transmit 1
+			transmit(pin, pt2262.One)
+		} else if bit == "0" {
 			fmt.Print(0)
+			// transmit 0
+			transmit(pin, pt2262.Zero)
+		} else {
+			log.Println("invalid word")
+			syscall.Exit(-1)
 		}
 	}
 
 	// transmit the sync bit at the end
-	transmit(pt2262.SyncFactor)
+	transmit(pin, pt2262.SyncFactor)
+	fmt.Println("")
+	C.digitalWrite(C.int(pin), C.LOW)
 }
 
-func transmit(bit protocols.HighLow)  {
-
+func transmit(pin int, bit protocols.HighLow)  {
+	// write the value 1 (high) on the pin...
+	C.digitalWrite(C.int(pin), C.HIGH)
+	// ...for pulse length * bit high length microseconds
+	C.delayMicroseconds(C.uint(pt2262.PulseLength * bit.High))
+	// then write 0 (low)...
+	C.digitalWrite(C.int(pin), C.LOW)
+	// ...for pulse length * bit low length microseconds
+	C.delayMicroseconds(C.uint(pt2262.PulseLength * bit.Low))
 }
 
 func main()  {
 	args := os.Args
-	if len(args) < 2 {
-		log.Println("parameters not valid, require code")
-		log.Println("send 9999")
-	}
-
-	codeStr := os.Args[1]
-	code, err := strconv.Atoi(codeStr)
-	if err != nil {
-		log.Println(err)
+	if len(args) < 3 {
+		log.Println("parameters not valid, require pin, code")
+		log.Println("ex: send 0 9999")
 		return
 	}
+
+	strPin := os.Args[1]
+	pin, _ := strconv.Atoi(strPin)
+
+	word := os.Args[2]
 
 	log.Println("calling setup")
 	init := C.wiringPiSetup()
@@ -79,7 +87,14 @@ func main()  {
 		return
 	}
 
+	code, _ := strconv.Atoi(word)
+
+	// decimal & operation on code word to convert it to binary
+	// ex: 1361 -> 10101010001
+	word = strconv.FormatInt(int64(code), 2)
+
+	log.Printf("sending %d times %d\n", RepeatTransmit, code)
 	for i := 0; i < RepeatTransmit; i++ {
-		send(code)
+		send(pin, word)
 	}
 }

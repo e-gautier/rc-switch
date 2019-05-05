@@ -15,7 +15,7 @@ func GetPT2262Protocol() PT2262 {
 		HighLow{1, 31},
 		HighLow{1, 3},
 		HighLow{3, 1},
-		9900, // I got this by measurement
+		4300,
 		false,
 	}
 }

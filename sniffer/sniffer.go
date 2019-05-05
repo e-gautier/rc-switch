@@ -46,8 +46,10 @@ func diff(A int, B int) int {
 }
 
 func decode() bool {
+
 	// Assuming the longer pulse length is the pulse captured in frame[0]
 	var code int
+	codestr := ""
 
 	var syncLengthInPulses int
 	if pt2262.SyncFactor.Low > pt2262.SyncFactor.High {
@@ -73,9 +75,11 @@ func decode() bool {
 
 		if diff(frame[i], delay*pt2262.Zero.High) < delayTolerance && diff(frame[i+1], delay*pt2262.Zero.Low) < delayTolerance {
 			// zero, do nothing shifting will add a zero
+			codestr += "0"
 		} else if diff(frame[i], delay*pt2262.One.High) < delayTolerance && diff(frame[i+1], delay*pt2262.One.Low) < delayTolerance {
 			// one, or operation 0|1 add 1 to the end of word before shifting
 			code |= 1
+			codestr += "1"
 		} else {
 			// failure
 			return false
@@ -85,6 +89,8 @@ func decode() bool {
 	if changeCount > 7 {
 		// ignore short transmission to avoid noise interpretation
 		fmt.Println("code: ", code)
+		fmt.Println("codestr: ", codestr)
+		fmt.Println("length: ", len(codestr))
 		fmt.Println("received bit strength: ", (changeCount-1)/2)
 		fmt.Println("delay: ", delay)
 		return true
@@ -114,6 +120,8 @@ func signalHandler() {
 		// x a silence
 		// v a gap between two signals
 		if diff(signalDuration, frame[0]) < 200 {
+
+			fmt.Println("gap")
 
 			// increment the repeat counter which is used to confirm since most of protocol repeat twice a signal on
 			// sent
@@ -154,6 +162,7 @@ func main() {
 	if len(args) < 2 {
 		log.Println("parameters not valid, require pin")
 		log.Println("./sniffer 2")
+		return
 	}
 
 	pinStr := os.Args[1]
