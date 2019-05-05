@@ -1,5 +1,11 @@
 # rc-switch
+Not really rc-switch but more like a test I made of the CGO wrapper on a cross-compiled arm lib.
+## quick start
 
+## TODO
+- more doc
+- more experiment
+- real auto tests
 ## requirements
 - raspberry pi with GPIO,
 - antenna receiver plugged on GPIO 2
