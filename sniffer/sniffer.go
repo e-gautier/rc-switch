@@ -53,8 +53,7 @@ func decode() bool {
 	}
 
 	// Assuming the longer pulse length is the pulse captured in frame[0]
-	var code int
-	binaryCode := ""
+	var binaryCode string
 
 	var syncLengthInPulses int
 	if pt2262.SyncFactor.Low > pt2262.SyncFactor.High {
@@ -75,15 +74,11 @@ func decode() bool {
 
 	// iterate over the signal frame to make a 32 bit word (big endian way)
 	for i := firstDataTransmissionTime; i < changeCount-1; i += 2 {
-		// shift bit to left to proceed the next bit (if code is zero then it still equals zero)
-		code <<= 1
-
 		if diff(frame[i], delay*pt2262.Zero.High) < delayTolerance && diff(frame[i+1], delay*pt2262.Zero.Low) < delayTolerance {
-			// zero, do nothing shifting will add a zero
+			// zero
 			binaryCode += "0"
 		} else if diff(frame[i], delay*pt2262.One.High) < delayTolerance && diff(frame[i+1], delay*pt2262.One.Low) < delayTolerance {
-			// one, or operation 0|1 add 1 to the end of word before shifting
-			code |= 1
+			// one
 			binaryCode += "1"
 		} else {
 			// failure
@@ -91,6 +86,7 @@ func decode() bool {
 		}
 	}
 
+	code, _ := strconv.ParseInt(binaryCode, 2, 64)
 	fmt.Println("code: ", code)
 	fmt.Println("binaryCode: ", binaryCode)
 	fmt.Println("length: ", len(binaryCode))
