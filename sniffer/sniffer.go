@@ -88,7 +88,7 @@ func decode() bool {
 
 	code, _ := strconv.ParseInt(binaryCode, 2, 64)
 	fmt.Println("code: ", code)
-	fmt.Println("binaryCode: ", binaryCode)
+	fmt.Println("binary code: ", binaryCode)
 	fmt.Println("length: ", len(binaryCode))
 	fmt.Println("received bit strength: ", (changeCount-1)/2)
 	fmt.Println("delay: ", delay)
