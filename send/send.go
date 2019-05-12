@@ -24,7 +24,7 @@ const RepeatTransmit = 10
 // properties of the PT2262 protocol
 var pt2262 = protocols.GetPT2262Protocol()
 
-func send(pin int, code int)  {
+func send(pin int, code int) {
 
 	//decimal & operation on code word to convert it to binary
 	//ex: 1361 -> 10101010001
@@ -53,7 +53,7 @@ func send(pin int, code int)  {
 	fmt.Println("")
 }
 
-func transmit(pin int, bit protocols.HighLow)  {
+func transmit(pin int, bit protocols.HighLow) {
 	// write the value 1 (high) on the pin...
 	C.digitalWrite(C.int(pin), C.HIGH)
 	// ...for pulse length * bit high length microseconds
@@ -64,7 +64,7 @@ func transmit(pin int, bit protocols.HighLow)  {
 	C.delayMicroseconds(C.uint(pt2262.PulseLength * bit.Low))
 }
 
-func main()  {
+func main() {
 	args := os.Args
 	if len(args) < 3 {
 		log.Println("parameters not valid, require pin, code")
