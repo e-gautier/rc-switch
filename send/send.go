@@ -12,17 +12,24 @@ import "C"
 import (
 	"fmt"
 	"log"
+	"log/syslog"
 	"os"
 	"strconv"
 	"syscall"
 )
-import "../protocols"
+import (
+	"../config"
+	"../protocols"
+)
 
 // repeat one transmission n times
-const RepeatTransmit = 10
+const RepeatTransmit int = 10
 
 // properties of the PT2262 protocol
 var pt2262 = protocols.GetPT2262Protocol()
+
+// global config writer
+var syslogWriter, _ = syslog.New(syslog.LOG_USER, config.SysLogTagSender)
 
 func send(pin int, code int) {
 
@@ -35,22 +42,19 @@ func send(pin int, code int) {
 		bit := string(word[i])
 
 		if bit == "1" {
-			fmt.Print(1)
 			// transmit 1
 			transmit(pin, pt2262.One)
 		} else if bit == "0" {
-			fmt.Print(0)
 			// transmit 0
 			transmit(pin, pt2262.Zero)
 		} else {
-			log.Println("invalid word")
-			syscall.Exit(-1)
+			_ = syslogWriter.Info("invalid word")
+			syscall.Exit(1)
 		}
 	}
 
 	// transmit the sync bit at the end
 	transmit(pin, pt2262.SyncFactor)
-	fmt.Println("")
 }
 
 func transmit(pin int, bit protocols.HighLow) {
@@ -77,7 +81,7 @@ func main() {
 
 	word := os.Args[2]
 
-	log.Println("calling setup")
+	_ = syslogWriter.Info("calling setup")
 	init := C.wiringPiSetup()
 
 	if init == -1 {
@@ -90,7 +94,7 @@ func main() {
 
 	code, _ := strconv.Atoi(word)
 
-	log.Printf("sending %d times %d\n", RepeatTransmit, code)
+	_ = syslogWriter.Info(fmt.Sprintf("sending %d times %d", RepeatTransmit, code))
 	for i := 0; i < RepeatTransmit; i++ {
 		send(pin, code)
 	}

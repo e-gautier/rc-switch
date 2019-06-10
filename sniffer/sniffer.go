@@ -16,19 +16,24 @@ import "C"
 import (
 	"fmt"
 	"log"
+	"log/syslog"
 	"math"
 	"os"
 	"strconv"
+	"syscall"
 	"time"
 )
-import "../protocols"
+import (
+	"../config"
+	"../protocols"
+)
 
 // max high/low changes per frame
 // We can handle up to 32 bit * 2 H/L changes per bit + 2 for sync
-const MaxChangesPerFrame = 67
+const MaxChangesPerFrame int = 67
 
 // NReceiveTolerance 60 microseconds TODO define
-const NReceiveTolerance = 60
+const NReceiveTolerance int = 60
 
 // properties of the PT2262 protocol
 var pt2262 = protocols.GetPT2262Protocol()
@@ -40,6 +45,9 @@ var frame [MaxChangesPerFrame]int
 var lastTime = 0
 var changeCount = 0
 var repeatCount = 0
+
+// global config writer
+var syslogWriter, _ = syslog.New(syslog.LOG_USER, config.SysLogTagSniffer)
 
 func diff(A int, B int) int {
 	return int(math.Abs(float64(A) - float64(B)))
@@ -87,11 +95,13 @@ func decode() bool {
 	}
 
 	code, _ := strconv.ParseInt(binaryCode, 2, 64)
-	fmt.Println("code: ", code)
-	fmt.Println("binary code: ", binaryCode)
-	fmt.Println("length: ", len(binaryCode))
-	fmt.Println("received bit strength: ", (changeCount-1)/2)
-	fmt.Println("delay: ", delay)
+
+	_ = syslogWriter.Info(fmt.Sprintf("receiving code: %d", code))
+	_ = syslogWriter.Debug(fmt.Sprintf("binary code: %s", binaryCode))
+	_ = syslogWriter.Debug(fmt.Sprintf("binary code length: %d", len(binaryCode)))
+	_ = syslogWriter.Debug(fmt.Sprintf("bit strength: %d", (changeCount-1)/2))
+	_ = syslogWriter.Debug(fmt.Sprintf("delay: %d", delay))
+
 	return true
 }
 
@@ -156,27 +166,27 @@ func main() {
 	if len(args) < 2 {
 		log.Println("parameters not valid, require pin")
 		log.Println("./sniffer 2")
-		return
+		syscall.Exit(1)
 	}
 
 	pinStr := os.Args[1]
 	pin, err := strconv.Atoi(pinStr)
 	if err != nil {
 		log.Println(err)
-		return
+		syscall.Exit(1)
 	}
 
 	// init wiring-pi library
-	log.Println("calling setup")
+	_ = syslogWriter.Info("calling setup")
 	init := C.wiringPiSetup()
 
 	if init == -1 {
 		log.Println("init failed")
-		return
+		syscall.Exit(1)
 	}
 
 	// this wiring-pi method will call the handle callback any time a high/low change happens on the GPIO pin
-	log.Println("calling handler")
+	_ = syslogWriter.Info("calling handler")
 	C.wiringPiISRWrapper(C.int(pin), C.INT_EDGE_BOTH)
 
 	// sleep the main thread til SIGTERM
