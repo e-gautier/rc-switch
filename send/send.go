@@ -72,14 +72,20 @@ func main() {
 	args := os.Args
 	if len(args) < 3 {
 		log.Println("parameters not valid, require pin, code")
+		log.Println("send PIN CODE [REPEAT=10]")
 		log.Println("ex: send 0 9999")
 		return
 	}
 
-	strPin := os.Args[1]
+	strPin := args[1]
 	pin, _ := strconv.Atoi(strPin)
 
-	word := os.Args[2]
+	word := args[2]
+
+	repeat := RepeatTransmit
+	if len(args) == 4 {
+		repeat, _ = strconv.Atoi(args[3])
+	}
 
 	_ = syslogWriter.Info("calling setup")
 	init := C.wiringPiSetup()
@@ -94,8 +100,8 @@ func main() {
 
 	code, _ := strconv.Atoi(word)
 
-	_ = syslogWriter.Info(fmt.Sprintf("sending %d times %d", RepeatTransmit, code))
-	for i := 0; i < RepeatTransmit; i++ {
+	_ = syslogWriter.Info(fmt.Sprintf("sending %d times %d", repeat, code))
+	for i := 0; i < repeat; i++ {
 		send(pin, code)
 	}
 
